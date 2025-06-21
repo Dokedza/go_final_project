@@ -4,7 +4,6 @@ import (
 	"fmt"
 	database "go1f/pkg/db"
 	"go1f/pkg/server"
-	//"os"
 )
 
 func main() {
@@ -19,6 +18,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer database.Db.Close()
+
 	//по какой-то причине не видит database.Db
 }

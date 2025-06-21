@@ -29,5 +29,7 @@ func Init(dbFile string) error {
 			return err
 		}
 	}
+
+	defer Db.Close()
 	return nil
 }
