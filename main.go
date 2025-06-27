@@ -19,5 +19,4 @@ func main() {
 		panic(err)
 	}
 
-	//по какой-то причине не видит database.Db
 }
