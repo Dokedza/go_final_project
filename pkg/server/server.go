@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dokedza/go_final_project/pkg/api"
+	"go1f/pkg/api"
+
 	"github.com/dokedza/go_final_project/pkg/db"
 )
 

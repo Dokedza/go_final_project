@@ -42,7 +42,7 @@ func GetTask(id string) (*Task, error) {
 	}
 	defer db.Close()
 
-	row := db.QueryRow("SELECT date, title, comment, repeat FROM scheduler WHERE id = : id", sql.Named("id", id))
+	row := db.QueryRow("SELECT date, title, comment, repeat FROM scheduler WHERE id = : id")
 	task := &Task{}
 	err = row.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
 	if err != nil {
@@ -78,7 +78,8 @@ func UpdateTask(task *Task) error {
 	}
 	return nil
 }
-func DeleteTask(task *Task) error {
+
+func DeleteTask(id string) error {
 
 	db, err := sql.Open("sqlite", "scheduler.db")
 	if err != nil {
@@ -86,7 +87,8 @@ func DeleteTask(task *Task) error {
 
 	}
 	defer db.Close()
-	res, err := db.Exec("DELETE FROM scheduler WHERE id = : id ", sql.Named("id", task.ID))
+
+	res, err := db.Exec("DELETE FROM scheduler WHERE id = : id ", sql.Named("id", id))
 	if err != nil {
 		return err
 	}
@@ -96,6 +98,57 @@ func DeleteTask(task *Task) error {
 	}
 	if rows == 0 {
 		return fmt.Errorf("Неизвестный ID")
+	}
+	return nil
+}
+
+func Tasks(limit int) ([]*Task, error) {
+
+	db, err := sql.Open("sqlite", "scheduler.db")
+	if err != nil {
+		fmt.Println(err)
+
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASK limit", sql.Named("limit", limit))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var task []*Task
+	for rows.Next() {
+		taskValue := new(Task)
+		err := rows.Scan(&taskValue.ID, &taskValue.Date, &taskValue.Title, &taskValue.Comment, &taskValue.Repeat)
+		if err != nil {
+			return nil, err
+		}
+		task = append(task, taskValue)
+	}
+
+	return task, nil
+}
+
+func UpdateDate(next string, id string) error {
+
+	db, err := sql.Open("sqlite", "scheduler.db")
+	if err != nil {
+		fmt.Println(err)
+
+	}
+	defer db.Close()
+
+	res, err := db.Exec("UPDATE scheduler SET date = : date WHERE id = : id", sql.Named("date", next), sql.Named("id", id))
+	if err != nil {
+		return err
+	}
+	val, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if val == 0 {
+		return fmt.Errorf("ошибка")
 	}
 	return nil
 }
