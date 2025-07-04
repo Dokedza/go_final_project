@@ -27,9 +27,7 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 		tasks = []*db.Task{}
 	}
 
-	writeJson(w, http.StatusOK, TasksResp{
-		Tasks: tasks,
-	})
+	writeJson(w, http.StatusOK, map[string]any{"tasks:": tasks})
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {

@@ -36,7 +36,7 @@ func checkDate(task *db.Task) error {
 	}
 	var next string
 
-	if !afterNow(now, t) {
+	if beforeNow(now, t) {
 		if task.Repeat == "" {
 			task.Date = now.Format(DateFormat)
 		} else {
@@ -85,8 +85,15 @@ func writeJson(w http.ResponseWriter, status int, data any) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func afterNow(now, date time.Time) bool {
-	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, date.Location())
-	return date.After(now)
+func beforeNow(now, t time.Time) bool {
+	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, t.Location())
+	return now.After(t)
+
 }
+
+//func afterNow(now, date time.Time) bool {
+//	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+//	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, date.Location())
+//	return date.After(now)
+//}

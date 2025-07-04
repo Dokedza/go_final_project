@@ -24,7 +24,7 @@ func AddTask(task *Task) (int64, error) {
 
 func GetTask(id string) (*Task, error) {
 
-	row := DB.QueryRow("SELECT date, title, comment, repeat FROM scheduler WHERE id = ?", id)
+	row := DB.QueryRow("SELECT id, date, title, comment, repeat FROM scheduler WHERE id = ?", id)
 	task := &Task{}
 	err := row.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
 	if err != nil {

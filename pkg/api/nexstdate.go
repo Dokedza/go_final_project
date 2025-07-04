@@ -70,10 +70,7 @@ func nextDayHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if nowString == dateString {
-		w.Write([]byte(nowString))
-		return
-	}
+
 	val, err := NextDate(now, dateString, repeat)
 	if err != nil {
 		fmt.Println(err)
