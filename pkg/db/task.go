@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 )
 
@@ -14,37 +13,20 @@ type Task struct {
 }
 
 func AddTask(task *Task) (int64, error) {
-	var id int64
-	db, err := sql.Open("sqlite", "scheduler.db")
-	if err != nil {
-		fmt.Println(err)
 
-	}
-	defer db.Close()
 	// определите запрос
-	res, err := db.Exec("INSERT INTO scheduler (date, title, comment, repeat) VALUES (date, title, comment, repeat)",
-		sql.Named("date", task.Date),
-		sql.Named("title", task.Title),
-		sql.Named("comment", task.Comment),
-		sql.Named("repeat", task.Repeat))
-	if err == nil {
-		id, err = res.LastInsertId()
+	res, err := DB.Exec("INSERT INTO scheduler (date, title, comment, repeat) VALUES (?,?,?,?)", task.Date, task.Title, task.Comment, task.Repeat)
+	if err != nil {
+		return 0, err
 	}
-	return id, err
+	return res.LastInsertId()
 }
 
 func GetTask(id string) (*Task, error) {
 
-	db, err := sql.Open("sqlite", "scheduler.db")
-	if err != nil {
-		fmt.Println(err)
-
-	}
-	defer db.Close()
-
-	row := db.QueryRow("SELECT date, title, comment, repeat FROM scheduler WHERE id = : id")
+	row := DB.QueryRow("SELECT date, title, comment, repeat FROM scheduler WHERE id = ?", id)
 	task := &Task{}
-	err = row.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
+	err := row.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
 	if err != nil {
 		return nil, err
 	}
@@ -53,19 +35,7 @@ func GetTask(id string) (*Task, error) {
 
 func UpdateTask(task *Task) error {
 
-	db, err := sql.Open("sqlite", "scheduler.db")
-	if err != nil {
-		fmt.Println(err)
-
-	}
-	defer db.Close()
-
-	res, err := db.Exec("UPDATE scheduler SET date = : date AND title = : title AND comment = : comment AND repeat = : repeat WHERE id = : id",
-		sql.Named("date", task.Date),
-		sql.Named("title", task.Title),
-		sql.Named("comment", task.Comment),
-		sql.Named("repeat", task.Repeat),
-		sql.Named("id", task.ID))
+	res, err := DB.Exec("UPDATE scheduler SET date = ? AND title = ? AND comment = ? AND repeat = ? WHERE id = ?", task.Date, task.Title, task.Comment, task.Repeat, task.ID)
 	if err != nil {
 		return err
 	}
@@ -81,14 +51,7 @@ func UpdateTask(task *Task) error {
 
 func DeleteTask(id string) error {
 
-	db, err := sql.Open("sqlite", "scheduler.db")
-	if err != nil {
-		fmt.Println(err)
-
-	}
-	defer db.Close()
-
-	res, err := db.Exec("DELETE FROM scheduler WHERE id = : id ", sql.Named("id", id))
+	res, err := DB.Exec("DELETE FROM scheduler WHERE id = ? ", id)
 	if err != nil {
 		return err
 	}
@@ -104,14 +67,7 @@ func DeleteTask(id string) error {
 
 func Tasks(limit int) ([]*Task, error) {
 
-	db, err := sql.Open("sqlite", "scheduler.db")
-	if err != nil {
-		fmt.Println(err)
-
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASK limit", sql.Named("limit", limit))
+	rows, err := DB.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASK limit", limit)
 	if err != nil {
 		return nil, err
 	}
@@ -126,20 +82,17 @@ func Tasks(limit int) ([]*Task, error) {
 		}
 		task = append(task, taskValue)
 	}
+	err = rows.Err()
 
+	if err != nil {
+		return nil, err
+	}
 	return task, nil
 }
 
 func UpdateDate(next string, id string) error {
 
-	db, err := sql.Open("sqlite", "scheduler.db")
-	if err != nil {
-		fmt.Println(err)
-
-	}
-	defer db.Close()
-
-	res, err := db.Exec("UPDATE scheduler SET date = : date WHERE id = : id", sql.Named("date", next), sql.Named("id", id))
+	res, err := DB.Exec("UPDATE scheduler SET date = ? WHERE id = ?", next, id)
 	if err != nil {
 		return err
 	}

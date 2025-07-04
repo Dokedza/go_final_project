@@ -3,6 +3,8 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 
 	"go1f/pkg/api"
 
@@ -14,8 +16,20 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	api.Init()
+
 	port := 7540
+
+	envPort := os.Getenv("TODO_PORT")
+	if envPort != "" {
+		p, err := strconv.Atoi(envPort)
+		if err == nil {
+			port = p
+		}
+	}
+
+	api.Init()
+
 	http.Handle("/", http.FileServer(http.Dir("web")))
+	fmt.Printf("Сервер запущен на порту: http://localhost:7540")
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }

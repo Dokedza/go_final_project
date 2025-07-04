@@ -20,14 +20,14 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 	tasks, err := db.Tasks(50) // в параметре максимальное количество записей
 
 	if err != nil {
-		writeJson(w, map[string]string{"error:": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 		return
 	}
 	if tasks == nil {
 		tasks = []*db.Task{}
 	}
 
-	writeJson(w, TasksResp{
+	writeJson(w, http.StatusOK, TasksResp{
 		Tasks: tasks,
 	})
 }
@@ -35,15 +35,15 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 func getHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		writeJson(w, map[string]string{"error:": "отсутствует id"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error:": "отсутствует id"})
 		return
 	}
 	task, err := db.GetTask(id)
 	if err != nil {
-		writeJson(w, map[string]string{"error:": "отсутствует задача"})
+		writeJson(w, http.StatusNotFound, map[string]string{"error:": "отсутствует задача"})
 		return
 	}
-	writeJson(w, task)
+	writeJson(w, http.StatusOK, task)
 }
 
 func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -52,27 +52,27 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error:": err.Error()})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error:": err.Error()})
 		return
 	}
 
 	err = checkDate(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error:": err.Error()})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error:": err.Error()})
 		return
 	}
 
 	err = db.UpdateTask(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error:": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 		return
 	}
 
 	if task.Title == "" {
-		writeJson(w, map[string]string{"error:": "Отсутствует заголовок задачи"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error:": "Отсутствует заголовок задачи"})
 		return
 	}
-	writeJson(w, map[string]string{})
+	writeJson(w, http.StatusOK, map[string]string{})
 }
 
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -80,17 +80,17 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 
 	if id == "" {
-		writeJson(w, map[string]string{"error:": "Отсутствует id"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error:": "Отсутствует id"})
 		return
 	}
 
 	err := db.DeleteTask(id)
 	if err != nil {
-		writeJson(w, map[string]string{"error:": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 		return
 	}
 
-	writeJson(w, map[string]string{})
+	writeJson(w, http.StatusOK, map[string]string{})
 }
 
 func doneHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,34 +99,34 @@ func doneHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		writeJson(w, map[string]string{"error:": "Отсутствует id"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error:": "Отсутствует id"})
 		return
 	}
 
 	task, err := db.GetTask(id)
 	if err != nil {
-		writeJson(w, map[string]string{"error:": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 		return
 	}
 	if task.Repeat == "" {
 		err = db.DeleteTask(id)
 		if err != nil {
-			writeJson(w, map[string]string{"error:": err.Error()})
+			writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 			return
 		}
-		writeJson(w, map[string]string{})
+		writeJson(w, http.StatusOK, map[string]string{})
 		return
 	}
 	now := time.Now()
 	next, err := NextDate(now, task.Date, task.Repeat)
 	if err != nil {
-		writeJson(w, map[string]string{"error:": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 		return
 	}
 	err = db.UpdateDate(next, id)
 	if err != nil {
-		writeJson(w, map[string]string{"error:": err.Error()})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 		return
 	}
-	writeJson(w, map[string]string{})
+	writeJson(w, http.StatusOK, map[string]string{})
 }

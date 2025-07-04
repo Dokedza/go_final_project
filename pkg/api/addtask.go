@@ -35,17 +35,15 @@ func checkDate(task *db.Task) error {
 		return err
 	}
 	var next string
-	if task.Repeat != "" {
-		next, err = NextDate(now, task.Date, task.Repeat)
-		if err != nil {
-			return err
-		}
-	}
 
-	if time.Now().After(t) {
+	if !afterNow(now, t) {
 		if task.Repeat == "" {
 			task.Date = now.Format(DateFormat)
 		} else {
+			next, err = NextDate(now, task.Date, task.Repeat)
+			if err != nil {
+				return err
+			}
 			task.Date = next
 		}
 	}
@@ -54,28 +52,41 @@ func checkDate(task *db.Task) error {
 func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task db.Task
 	decoder := json.NewDecoder(r.Body)
+
 	err := decoder.Decode(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error": "ошибка десериализации JSON"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
+
 	if task.Title == "" {
-		writeJson(w, map[string]string{"error": "не указан заголовок задачи"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": "отсутствует задача"})
 		return
 	}
+
 	err = checkDate(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error": "дата представлена в формате, отличном от 20060102"})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
+
 	id, err := db.AddTask(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error": "правило повторения указано в неправильном формате"})
+		writeJson(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
-	writeJson(w, map[string]string{"id": strconv.FormatInt(id, 10)})
+
+	writeJson(w, http.StatusOK, map[string]string{"id": strconv.FormatInt(id, 10)})
 }
-func writeJson(w http.ResponseWriter, data any) {
+
+func writeJson(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
+}
+
+func afterNow(now, date time.Time) bool {
+	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, date.Location())
+	return date.After(now)
 }
