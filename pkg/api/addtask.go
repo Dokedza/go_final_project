@@ -15,7 +15,7 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		addTaskHandler(w, r)
 	case http.MethodGet:
-		getHandler(w, r)
+		getTaskHandler(w, r)
 	case http.MethodPut:
 		updateTaskHandler(w, r)
 	case http.MethodDelete:
@@ -91,9 +91,3 @@ func beforeNow(now, t time.Time) bool {
 	return now.After(t)
 
 }
-
-//func afterNow(now, date time.Time) bool {
-//	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-//	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, date.Location())
-//	return date.After(now)
-//}

@@ -5,11 +5,11 @@ import (
 )
 
 type Task struct {
-	ID      string `json:"id"`
-	Date    string `json:"date"`
-	Title   string `json:"title"`
-	Comment string `json:"comment"`
-	Repeat  string `json:"repeat"`
+	ID      string `json:"id,omitempty"`
+	Date    string `json:"date,omitempty"`
+	Title   string `json:"title,omitempty"`
+	Comment string `json:"comment,omitempty"`
+	Repeat  string `json:"repeat,omitempty"`
 }
 
 func AddTask(task *Task) (int64, error) {

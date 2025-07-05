@@ -23,14 +23,15 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 		return
 	}
+	//если пустой список
 	if tasks == nil {
 		tasks = []*db.Task{}
 	}
 
-	writeJson(w, http.StatusOK, map[string]any{"tasks:": tasks})
+	writeJson(w, http.StatusOK, map[string]any{"tasks": tasks})
 }
 
-func getHandler(w http.ResponseWriter, r *http.Request) {
+func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	if id == "" {
 		writeJson(w, http.StatusBadRequest, map[string]string{"error:": "отсутствует id"})
@@ -70,7 +71,7 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, http.StatusBadRequest, map[string]string{"error:": "Отсутствует заголовок задачи"})
 		return
 	}
-	writeJson(w, http.StatusOK, map[string]string{})
+	writeJson(w, http.StatusOK, map[string]any{})
 }
 
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -126,5 +127,5 @@ func doneHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, http.StatusInternalServerError, map[string]string{"error:": err.Error()})
 		return
 	}
-	writeJson(w, http.StatusOK, map[string]string{})
+	writeJson(w, http.StatusOK, map[string]any{})
 }
