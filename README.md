@@ -11,4 +11,4 @@
 
 Порт сервера расположен по адресу http://localhost:7540
 
-для запуска тестов go test ./tests
+для запуска тестов go test -count=1 -v ./tests

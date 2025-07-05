@@ -35,7 +35,7 @@ func GetTask(id string) (*Task, error) {
 
 func UpdateTask(task *Task) error {
 
-	res, err := DB.Exec("UPDATE scheduler SET date = ? AND title = ? AND comment = ? AND repeat = ? WHERE id = ?", task.Date, task.Title, task.Comment, task.Repeat, task.ID)
+	res, err := DB.Exec("UPDATE scheduler SET date = ?, title = ?, comment = ?, repeat = ? WHERE id = ?", task.Date, task.Title, task.Comment, task.Repeat, task.ID)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func DeleteTask(id string) error {
 
 func Tasks(limit int) ([]*Task, error) {
 
-	rows, err := DB.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASK limit", limit)
+	rows, err := DB.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASС limit ?", limit)
 	if err != nil {
 		return nil, err
 	}

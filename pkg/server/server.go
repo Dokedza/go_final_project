@@ -12,7 +12,7 @@ import (
 )
 
 func Run() error {
-	err := db.Init("sheduler.db")
+	err := db.Init("scheduler.db")
 	if err != nil {
 		return err
 	}
