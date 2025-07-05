@@ -67,7 +67,7 @@ func DeleteTask(id string) error {
 
 func Tasks(limit int) ([]*Task, error) {
 
-	rows, err := DB.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASС limit ?", limit)
+	rows, err := DB.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date ASC limit ?", limit)
 	if err != nil {
 		return nil, err
 	}
